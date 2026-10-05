@@ -3,15 +3,15 @@ import { Route, Routes } from 'react-router-dom'
 import Home from './pages/home'
 import Collection from './pages/Collection'
 import Contact from './pages/Contact'
+import Product from "./pages/Product";
+import PlaceOrder from "./pages/PlaceOrder";
+import SearchBar from "./components/SearchBar";
 import About from './pages/About'
-import Product from './pages/product'
 import Login from './pages/Login'
 import Cart from './pages/Cart'
 import Order from './pages/Orders'
-import PlaceOrder from './pages/placeOrder'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import SearchBar from './components/searchBar'
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 const App = () => {
