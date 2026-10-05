@@ -1,15 +1,16 @@
 import React, { useContext, useState } from 'react';
 import Title from '../components/Title';
 import CartTotal from '../components/CartTotal';
-import {assets} from '../assets/frontend_assets/assets';
+import { assets } from '../assets/frontend_assets/assets';
 import { ShopContext } from '../context/shopContext';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import 'react-toastify/dist/ReactToastify.css';
-const PlaceOrder = () => {
 
-  const [method, setMethod] = useState('cod');
+const PlaceOrder = () => {
   const navigate = useNavigate();
+  const { backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
+  const [method, setMethod] = useState('cod');
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -23,16 +24,57 @@ const PlaceOrder = () => {
     phone: ''
   });
 
-  const onChangeHandler = (e) => {
-    const { name, value } = e.target;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const onChangeHandler = (event) => {
+    const { name, value } = event.target;
+    setFormData((data) => ({ ...data, [name]: value }));
   };
+
+  const onSubmitHandler = async (event) => {
+    event.preventDefault();
+    try {
+      let orderItems = [];
+
+      Object.keys(cartItems).forEach((itemId) => {
+        Object.keys(cartItems[itemId]).forEach((size) => {
+          if (cartItems[itemId][size] > 0) {
+            const itemInfo = structuredClone(products.find(product => product._id === itemId));
+            if (itemInfo) {
+              itemInfo.size = size;
+              itemInfo.quantity = cartItems[itemId][size];
+              orderItems.push(itemInfo);
+            }
+          }
+        });
+      });
+      console.log(formData);
+      
+      let orderData = {
+        address: formData,
+        items: orderItems,
+        amount: getCartAmount() + delivery_fee
+      };
+
+      switch (method) {
+        case 'cod':
+          const response = await axios.post(`${backendUrl}/api/order/place`, orderData, { headers: { token } });
+          if (response.data.success) {
+            setCartItems({});
+            navigate('/orders');
+          } else {
+            toast.error(response.data.message);
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message);
+    }
+  };
+
   return (
-    <form className='flex flex-col lg:flex-row gap-8 px-4 py-8 lg:px-20 lg:py-12'>
+    <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5 sm:pt-14 min-h-[80vh] border-t'>
       <div className='flex flex-col gap-4 w-full sm:max-w-[480px]'>
         <div className='text-xl sm:text-2xl my-3'>
           <Title text1={'DELIVERY'} text2={'INFORMATION'} />
@@ -74,9 +116,7 @@ const PlaceOrder = () => {
             </div>
           </div>
           <div className='w-full text-end mt-8'>
-            <button type="button" onClick={() => navigate('/orders')} className='bg-black text-white px-16 py-3 text-sm'>
-  PLACE ORDER
-</button>
+            <button type='submit' className='bg-black text-white px-16 py-3 text-sm'>PLACE ORDER</button>
           </div>
         </div>
       </div>

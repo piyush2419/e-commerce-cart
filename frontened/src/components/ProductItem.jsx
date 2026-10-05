@@ -10,7 +10,7 @@ const ProductItem = ({ id, image, name, price }) => {
     <Link className="cursor-pointer text-gray-800" to={`/product/${id}`}>
       <div className="overflow-hidden">
         <img className="hover:scale-110 transition ease-in-out"
-          src={image[0]}
+          src={image?.[0]}
           alt=""/>
         <p className="text-sm pt-2 pb-1 font-semibold mt-2">{name}</p>
         <p className="text-sm font-semibold">
